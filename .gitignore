@@ -1,0 +1,6 @@
+Azureus.app
+Vuze.app
+target
+*.iml
+*.ipr
+*.iws
