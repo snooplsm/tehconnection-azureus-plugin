@@ -3,6 +3,7 @@ package com.gent.azureus.plugins;
 import org.gudy.azureus2.plugins.PluginInterface;
 import org.gudy.azureus2.plugins.download.Download;
 import org.gudy.azureus2.plugins.download.DownloadAnnounceResult;
+import org.gudy.azureus2.plugins.download.DownloadManagerListener;
 import org.gudy.azureus2.plugins.download.DownloadScrapeResult;
 import org.gudy.azureus2.plugins.logging.LoggerChannel;
 import org.gudy.azureus2.plugins.torrent.Torrent;
@@ -17,7 +18,7 @@ import java.net.URL;
  * Time: 1:12 AM
  * To change this template use File | Settings | File Templates.
  */
-public class TehconnectionRunnable implements Runnable {
+public class TehconnectionRunnable implements Runnable, DownloadManagerListener {
 
     private final PluginInterface api;
 
@@ -32,6 +33,7 @@ public class TehconnectionRunnable implements Runnable {
     public TehconnectionRunnable(PluginInterface api) {
         this.api = api;
         log = api.getLogger().getChannel("tehconnection");
+        api.getDownloadManager().addListener(this);
     }
 
     private void pause(Download download, int seedCount) {
@@ -56,6 +58,10 @@ public class TehconnectionRunnable implements Runnable {
                 for (Download download : downloads) {
                     Torrent torrent = download.getTorrent();
                     if (!isTehConnection(torrent)) {
+                        continue;
+                    }
+                    if(download.isComplete()) {
+                        resume(download,Integer.MIN_VALUE);
                         continue;
                     }
                     DownloadAnnounceResult announce = download.getLastAnnounceResult();
@@ -105,4 +111,15 @@ public class TehconnectionRunnable implements Runnable {
         }
         return false;
     }
+
+    public void downloadAdded(Download download) {
+        if(isTehConnection(download.getTorrent())) {
+            pause(download,0);
+        }
+    }
+
+    public void downloadRemoved(Download download) {
+
+    }
+
 }
